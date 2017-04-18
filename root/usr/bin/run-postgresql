@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#source "${CONTAINER_SCRIPTS_PATH}/common.sh"
+
+#generate_passwd_file
+
+USER_ID=$(id -u)
+if [ ${USER_UID} != ${USER_ID} ]; then
+    sed "s@${USER_NAME}:x:\${USER_ID}:@${USER_NAME}:x:${USER_ID}:@g" ${HOME}/passwd.template > /etc/passwd
+fi
+
+ansible-playbook -c local -i localhost, /var/lib/pgsql/entrypoint.yml -e etcd=example-etcd-cluster.psql-ha-poc.svc
+
+
+exec /usr/bin/patroni /var/lib/pgsql/postgres.yml

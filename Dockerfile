@@ -10,6 +10,13 @@ RUN yum install -y epel-release && \
 # Install patroni and WAL-e
 ENV PATRONIVERSION=1.2.4
 ENV WALE_VERSION=1.0.3
+ENV PGHOME=/var/lib/pgsql/
+ENV PGROOT=$PGHOME/pgdata/pgroot
+ENV PGDATA=$PGROOT/data
+ENV PGLOG=$PGROOT/pg_log
+ENV WALE_ENV_DIR=$PGHOME/etc/wal-e.d/env
+ENV USER_NAME=${PGUSER}
+ENV USER_UID=26
 #ENV ENABLED_COLLECTIONS="rh-postgresql95 rh-python35"
 #RUN export DEBIAN_FRONTEND=noninteractive \
 #    export BUILD_PACKAGES="python3-pip" \
@@ -46,11 +53,11 @@ RUN pip install pip --upgrade && \
 #RUN curl -L https://raw.githubusercontent.com/zalando/pg_view/2ea99479460d81361bdb7601a1564072ddd584ac/pg_view.py \
 #    | sed -e 's/env python/env python3/g' > /usr/local/bin/pg_view.py && chmod +x /usr/local/bin/pg_view.py
 
-ENV PGHOME=/var/lib/pgsql/
-ENV PGROOT=$PGHOME/pgdata/pgroot
-ENV PGDATA=$PGROOT/data
-ENV PGLOG=$PGROOT/pg_log
-ENV WALE_ENV_DIR=$PGHOME/etc/wal-e.d/env
+
+ADD root /
+
+RUN chmod -R ug+x /usr/bin/user_setup && \
+    /usr/bin/user_setup
 
 # Set PGHOME as a login directory for the PostgreSQL user.
 #RUN usermod -d $PGHOME -m postgres
@@ -64,9 +71,10 @@ ENV WALE_ENV_DIR=$PGHOME/etc/wal-e.d/env
 #RUN chmod 700 /postgres_*
 ADD entrypoint.yml /var/lib/pgsql/
 ADD templates /var/lib/pgsql/templates
-ADD run-postgresql /usr/bin
+#ADD run-postgresql /usr/bin
 
-USER 26
+USER ${USER_UID}
+RUN sed "s@${USER_NAME}:x:${USER_UID}:@${USER_NAME}:x:\${USER_ID}:@g" /etc/passwd > ${HOME}/passwd.template
 WORKDIR $PGHOME
 EXPOSE 5432 8008
 
