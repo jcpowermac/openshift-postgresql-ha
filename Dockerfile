@@ -55,7 +55,7 @@ RUN pip install pip --upgrade && \
 
 
 RUN mv /opt/rh/rh-postgresql95/root/usr/bin/postgres{,-real} && \
-    echo "#!/usr/bin/bash" >>  /opt/rh/rh-postgresql95/root/usr/bin/postgres && \
+    echo "#!/usr/bin/bash" > /opt/rh/rh-postgresql95/root/usr/bin/postgres && \
     cat /opt/rh/rh-postgresql95/enable >> /opt/rh/rh-postgresql95/root/usr/bin/postgres && \
     echo 'exec postgres-real "$@"' >> /opt/rh/rh-postgresql95/root/usr/bin/postgres && \
     chmod 755 /opt/rh/rh-postgresql95/root/usr/bin/postgres
