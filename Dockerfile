@@ -54,6 +54,11 @@ RUN pip install pip --upgrade && \
 #    | sed -e 's/env python/env python3/g' > /usr/local/bin/pg_view.py && chmod +x /usr/local/bin/pg_view.py
 
 
+RUN mv /opt/rh/rh-postgresql95/root/usr/bin/postgres{,-real} && \
+    cp /opt/rh/rh-postgresql95/enable /opt/rh/rh-postgresql95/root/usr/bin/postgres && \
+    echo 'exec postgres-real "$@"' >> /opt/rh/rh-postgresql95/root/usr/bin/postgres && \
+    chmod 755 /opt/rh/rh-postgresql95/root/usr/bin/postgres
+
 ADD root /
 
 RUN chmod -R ug+x /usr/bin/user_setup && \
