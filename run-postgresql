@@ -7,4 +7,7 @@ generate_passwd_file
 ansible-playbook -c local -i localhost, /var/lib/pgsql/entrypoint.yml -e etcd=example-etcd-cluster.psql-ha-poc.svc
 
 
-exec patroni /var/lib/pgsql/postgres.yml
+exec env LD_PRELOAD=libnss_wrapper.so \
+    NSS_WRAPPER_PASSWD=${HOME}/passwd \
+    NSS_WRAPPER_GROUP=/etc/group \
+    /usr/bin/patroni /var/lib/pgsql/postgres.yml
