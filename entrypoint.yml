@@ -1,0 +1,15 @@
+---
+- name: entrypoint
+  hosts: localhost
+  gather_facts: True
+  tasks:
+    - name: env
+      debug:
+        msg: "{{ hostvars['localhost'] }}"
+
+    - name: Create Patroni Configuration
+      template:
+        src: templates/postgres.yml.j2
+        dest: /var/lib/pgsql/postgres.yml
+        #dest: /tmp/postgres.yml
+        #
