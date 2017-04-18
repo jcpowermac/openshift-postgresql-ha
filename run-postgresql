@@ -1,6 +1,8 @@
 #!/bin/bash
 
+source "${CONTAINER_SCRIPTS_PATH}/common.sh"
 
+generate_passwd_file
 
 ansible-playbook -c local -i localhost, /var/lib/pgsql/entrypoint.yml -e etcd=example-etcd-cluster.psql-ha-poc.svc
 
