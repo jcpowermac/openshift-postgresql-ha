@@ -1,39 +1,27 @@
 scope: postgresha 
-#namespace: /service/
 name: {{ ansible_hostname }}
 
 restapi:
   listen: 0.0.0.0:8008
   connect_address: {{ ansible_default_ipv4.address }}:8008
-#  certfile: /etc/ssl/certs/ssl-cert-snakeoil.pem
-#  keyfile: /etc/ssl/private/ssl-cert-snakeoil.key
-#  authentication:
-#    username: username
-#    password: password
-
 etcd:
     host: {{ etcd }}
-
 bootstrap:
   dcs:
     ttl: 30
     loop_wait: 10
     retry_timeout: 10
     maximum_lag_on_failover: 1048576
-#    master_start_timeout: 300
-#    synchronous_mode: false
     postgresql:
       use_pg_rewind: true
       use_slots: true
       parameters:
         archive_mode: "on"
         archive_timeout: 1800s
-        #archive_command: {{{postgresql.parameters.archive_command}}}
         wal_level: hot_standby
         wal_keep_segments: 8
         wal_log_hints: 'on'
         max_wal_senders: 5
-        #max_connections: {{postgresql.parameters.max_connections}}
         max_replication_slots: 5
         hot_standby: 'on'
         tcp_keepalives_idle: 900
@@ -53,29 +41,24 @@ bootstrap:
         autovacuum_max_workers: 5
         autovacuum_vacuum_scale_factor: 0.05
         autovacuum_analyze_scale_factor: 0.02
-
-  # some desired options for 'initdb'
-  initdb:  # Note: It needs to be a list (some options need values, others are switches)
+  initdb: 
   - encoding: UTF8
   - locale: en_US.UTF-8
   - data-checksums
-
-  pg_hba:  # Add following lines to pg_hba.conf after running 'initdb'
+  pg_hba: 
   - host replication replicator 0.0.0.0/0 md5
   - host all all 0.0.0.0/0 md5
-
   users:
     admin:
       password: admin
       options:
         - createrole
         - createdb
-
 postgresql:
   listen: 0.0.0.0:5432
   connect_address: {{ ansible_default_ipv4.address }}:5432
   data_dir: /var/lib/pgsql/pgdata/pgroot/data
-#  bin_dir:
+  bin_dir: /opt/rh/rh-postgresql95/root/usr/bin
   pgpass: /tmp/pgpass0
   authentication:
     replication:
