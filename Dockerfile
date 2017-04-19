@@ -37,8 +37,6 @@ ADD root /
 RUN chmod -R ug+x /usr/bin/user_setup /usr/bin/callback.py && \
     /usr/bin/user_setup
 
-ADD entrypoint.yml /var/lib/pgsql/
-ADD templates /var/lib/pgsql/templates
 
 USER ${USER_UID}
 RUN sed "s@${USER_NAME}:x:${USER_UID}:@${USER_NAME}:x:\${USER_ID}:@g" /etc/passwd > ${HOME}/passwd.template
