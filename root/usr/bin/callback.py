@@ -15,7 +15,7 @@ def main():
     print(sys.argv)
     patch = '{"metadata":{"labels":{"role": "%s"}}}' % sys.argv[2]
 
-    returncode = subprocess.call(['/usr/bin/oc', 'patch','pod', socket.gethostbyname(), '-p', patch])
+    returncode = subprocess.call(['/usr/bin/oc', 'patch','pod', socket.gethostname(), '-p', patch])
     print("return code %d" % returncode )
 
 if __name__ == "__main__":
