@@ -21,11 +21,6 @@ RUN pip install pip --upgrade && \
     curl -Lo /tmp/origin.tar.gz 'https://github.com/openshift/origin/releases/download/v1.5.0-rc.0/openshift-origin-client-tools-v1.5.0-rc.0-49a4a7a-linux-64bit.tar.gz' && \
     tar -C /usr/bin/ -xf /tmp/origin.tar.gz --wildcards --no-anchored 'oc' --strip 1
 
-#install pg_view
-#RUN curl -L https://raw.githubusercontent.com/zalando/pg_view/2ea99479460d81361bdb7601a1564072ddd584ac/pg_view.py \
-#    | sed -e 's/env python/env python3/g' > /usr/local/bin/pg_view.py && chmod +x /usr/local/bin/pg_view.py
-
-
 RUN mv /opt/rh/rh-postgresql95/root/usr/bin/postgres{,-real} && \
     echo '#!/usr/bin/bash' > /opt/rh/rh-postgresql95/root/usr/bin/postgres && \
     cat /opt/rh/rh-postgresql95/enable >> /opt/rh/rh-postgresql95/root/usr/bin/postgres && \
@@ -34,7 +29,7 @@ RUN mv /opt/rh/rh-postgresql95/root/usr/bin/postgres{,-real} && \
 
 ADD root /
 
-RUN chmod -R ug+x /usr/bin/user_setup /usr/bin/callback.py && \
+RUN chmod -R ug+x /usr/bin/user_setup /usr/bin/callback.py /usr/bin/init.py && \
     /usr/bin/user_setup
 
 
