@@ -39,6 +39,7 @@ objects:
       targetPort: 8008
     selector:
       name: ${DATABASE_SERVICE_NAME} 
+      role: master
     sessionAffinity: None
     type: ClusterIP
 
@@ -52,6 +53,7 @@ objects:
     database-replica-user: ${POSTGRESQL_REP_USER}
     database-replica-password: ${POSTGRESQL_REP_PASSWORD}
     database-admin-password: ${POSTGRESQL_ADMIN_PASSWORD}
+    database-postgres-password: ${POSTGRESQL_POSTGRES_PASSWORD}
 
 - apiVersion: v1
   kind: DeploymentConfig
@@ -104,6 +106,11 @@ objects:
               secretKeyRef:
                 key: database-admin-password
                 name: ${DATABASE_SERVICE_NAME}
+          - name: POSTGRESQL_POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: database-postgres-password
+                name: ${DATABASE_SERVICE_NAME}
           - name: POSTGRESQL_DATABASE
             value: ${POSTGRESQL_DATABASE}
           imagePullPolicy: Always
@@ -142,7 +149,7 @@ objects:
         - postgresql 
         from:
           kind: ImageStreamTag
-          name: postgresql:9.5
+          name: ${DATABASE_SERVICE_NAME}:9.5
       type: ImageChange
 
 
@@ -167,13 +174,13 @@ objects:
   kind: BuildConfig
   metadata:
     annotations: {}
-    name: postgresql
+    name: ${DATABASE_SERVICE_NAME} 
   spec:
     nodeSelector: null
     output:
       to:
         kind: ImageStreamTag
-        name: postgresql:9.5
+        name: ${DATABASE_SERVICE_NAME}:9.5
     postCommit: {}
     resources: {}
     runPolicy: Serial
@@ -209,6 +216,14 @@ parameters:
   generate: expression
   name: POSTGRESQL_USER
   required: true
+
+- description: Password for the PostgreSQL postgres user.
+  displayName: PostgreSQL postgres Password
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+  name: POSTGRESQL_POSTGRES_PASSWORD
+  required: true
+
 - description: Password for the PostgreSQL admin.
   displayName: PostgreSQL Admin Password
   from: '[a-zA-Z0-9]{16}'

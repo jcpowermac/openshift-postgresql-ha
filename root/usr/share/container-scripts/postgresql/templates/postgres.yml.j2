@@ -72,7 +72,7 @@ postgresql:
       password: {{ ansible_env.POSTGRESQL_REP_PASSWORD }}
     superuser:
       username: postgres
-      password: zalando
+      password: {{ ansible_env.POSTGRESQL_POSTGRES_PASSWORD }}
   parameters:
     logging_collector: 'on'
     log_destination: csvlog
