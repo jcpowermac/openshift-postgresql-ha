@@ -51,7 +51,7 @@ bootstrap:
   - host all all 0.0.0.0/0 md5
   users:
     admin:
-      password: admin
+      password: {{ ansible_env.POSTGRESQL_ADMIN_PASSWORD }} 
       options:
         - createrole
         - createdb
@@ -68,8 +68,8 @@ postgresql:
     on_role_change: /usr/bin/callback.py
   authentication:
     replication:
-      username: replicator
-      password: rep-pass
+      username: {{ ansible_env.POSTGRESQL_REP_USER }}
+      password: {{ ansible_env.POSTGRESQL_REP_PASSWORD }}
     superuser:
       username: postgres
       password: zalando

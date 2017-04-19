@@ -1,0 +1,241 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: postgresql-ha-ephemeral-template
+objects:
+
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: ${DATABASE_SERVICE_NAME} 
+
+- apiVersion: v1
+  groupNames: null
+  kind: RoleBinding
+  metadata:
+    name: postgres_edit 
+  roleRef:
+    name: edit
+  subjects:
+  - kind: ServiceAccount
+    name: ${DATABASE_SERVICE_NAME} 
+
+
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: ${DATABASE_SERVICE_NAME} 
+  spec:
+    ports:
+    - name: postgresql
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+    - name: patroni 
+      port: 8008
+      protocol: TCP
+      targetPort: 8008
+    selector:
+      name: ${DATABASE_SERVICE_NAME} 
+    sessionAffinity: None
+    type: ClusterIP
+
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${DATABASE_SERVICE_NAME}
+  stringData:
+    database-password: ${POSTGRESQL_PASSWORD}
+    database-user: ${POSTGRESQL_USER}
+    database-replica-user: ${POSTGRESQL_REP_USER}
+    database-replica-password: ${POSTGRESQL_REP_PASSWORD}
+    database-admin-password: ${POSTGRESQL_ADMIN_PASSWORD}
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: ${DATABASE_SERVICE_NAME}
+  spec:
+    replicas: 2
+    selector:
+      name: ${DATABASE_SERVICE_NAME}
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          name: ${DATABASE_SERVICE_NAME}
+      spec:
+        containers:
+        - image: ' '  
+          env:
+          - name: POSTGRESQL_REP_USER
+            valueFrom:
+              secretKeyRef:
+                key: database-replica-user
+                name: ${DATABASE_SERVICE_NAME}
+          - name: POSTGRESQL_REP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: database-replica-password
+                name: ${DATABASE_SERVICE_NAME}
+          - name: POSTGRESQL_USER
+            valueFrom:
+              secretKeyRef:
+                key: database-user
+                name: ${DATABASE_SERVICE_NAME}
+          - name: POSTGRESQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: database-password
+                name: ${DATABASE_SERVICE_NAME}
+          - name: POSTGRESQL_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: database-admin-password
+                name: ${DATABASE_SERVICE_NAME}
+          - name: POSTGRESQL_DATABASE
+            value: ${POSTGRESQL_DATABASE}
+          imagePullPolicy: Always
+          livenessProbe:
+            initialDelaySeconds: 30
+            tcpSocket:
+              port: 5432
+            timeoutSeconds: 1
+          name: postgresql 
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          - containerPort: 8008
+            protocol: TCP
+          resources:
+            limits:
+              memory: ${MEMORY_LIMIT}
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /var/lib/pgsql/data
+            name: ${DATABASE_SERVICE_NAME}-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        serviceAccount: ${DATABASE_SERVICE_NAME}
+        serviceAccountName: ${DATABASE_SERVICE_NAME}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: ${DATABASE_SERVICE_NAME}-data
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - postgresql 
+        from:
+          kind: ImageStreamTag
+          name: postgresql:9.5
+      type: ImageChange
+
+
+
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations: {}
+    name: postgresql-95-centos7
+  spec:
+    dockerImageRepository: "docker.io/centos/postgresql-95-centos7"
+
+
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations: {}
+    name: postgresql
+
+
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations: {}
+    name: postgresql
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: postgresql:9.5
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        uri: https://github.com/jcpowermac/psql-ha-poc
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: postgresql-95-centos7:latest
+      type: Docker
+    triggers:
+    - imageChange: {}
+      type: ImageChange
+parameters:
+- description: Maximum amount of memory the container can use.
+  displayName: Memory Limit
+  name: MEMORY_LIMIT
+  required: true
+  value: 512Mi
+
+- description: The name of the OpenShift Service exposed for the database.
+  displayName: Database Service Name
+  name: DATABASE_SERVICE_NAME
+  required: true
+  value: postgresql
+
+- description: Username for PostgreSQL user that will be used for accessing the database.
+  displayName: PostgreSQL Connection Username
+  from: user[A-Z0-9]{3}
+  generate: expression
+  name: POSTGRESQL_USER
+  required: true
+- description: Password for the PostgreSQL admin.
+  displayName: PostgreSQL Admin Password
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+  name: POSTGRESQL_ADMIN_PASSWORD
+  required: true
+- description: Password for the PostgreSQL connection user.
+  displayName: PostgreSQL Connection Password
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+  name: POSTGRESQL_PASSWORD
+  required: true
+- description: Username for PostgreSQL user that will be used for replicating the database.
+  displayName: PostgreSQL Replication Username
+  from: user[A-Z0-9]{3}
+  generate: expression
+  name: POSTGRESQL_REP_USER
+  required: true
+- description: Password for the PostgreSQL replication user.
+  displayName: PostgreSQL Replication Password
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+  name: POSTGRESQL_REP_PASSWORD
+  required: true
+- description: Name of the PostgreSQL database accessed.
+  displayName: PostgreSQL Database Name
+  name: POSTGRESQL_DATABASE
+  required: true
+  value: sampledb
+
