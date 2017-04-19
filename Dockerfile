@@ -33,7 +33,7 @@ RUN mv /opt/rh/rh-postgresql95/root/usr/bin/postgres{,-real} && \
 
 ADD root /
 
-RUN chmod -R ug+x /usr/bin/user_setup && \
+RUN chmod -R ug+x /usr/bin/user_setup /usr/bin/callback.py && \
     /usr/bin/user_setup
 
 ADD entrypoint.yml /var/lib/pgsql/
