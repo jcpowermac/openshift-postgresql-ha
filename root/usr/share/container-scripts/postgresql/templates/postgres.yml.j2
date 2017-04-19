@@ -55,7 +55,7 @@ bootstrap:
       options:
         - createrole
         - createdb
-    {{ ansible_env.POSTGRES_USER }}:
+    {{ ansible_env.POSTGRESQL_USER }}:
       password: {{ ansible_env.POSTGRESQL_PASSWORD }}
 postgresql:
   listen: 0.0.0.0:5432
