@@ -60,6 +60,11 @@ postgresql:
   data_dir: /var/lib/pgsql/pgdata/pgroot/data
   bin_dir: /opt/rh/rh-postgresql95/root/usr/bin
   pgpass: /tmp/pgpass0
+  callbacks:
+    on_start: /usr/bin/callback.py 
+    on_stop:  /usr/bin/callback.py
+    on_restart: /usr/bin/callback.py
+    on_role_change: /usr/bin/callback.py
   authentication:
     replication:
       username: replicator
