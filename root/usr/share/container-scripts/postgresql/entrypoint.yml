@@ -9,7 +9,5 @@
 
     - name: Create Patroni Configuration
       template:
-        src: templates/postgres.yml.j2
+        src: /usr/share/container-scripts/postgresql/templates/postgres.yml.j2
         dest: /var/lib/pgsql/postgres.yml
-        #dest: /tmp/postgres.yml
-        #
