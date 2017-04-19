@@ -41,6 +41,7 @@ bootstrap:
         autovacuum_max_workers: 5
         autovacuum_vacuum_scale_factor: 0.05
         autovacuum_analyze_scale_factor: 0.02
+  post_init: /usr/bin/init.py
   initdb: 
   - encoding: UTF8
   - locale: en_US.UTF-8
