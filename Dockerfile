@@ -17,8 +17,9 @@ ENV USER_NAME=${PGUSER}
 ENV USER_UID=26
 
 RUN pip install pip --upgrade && \
-    pip install --upgrade patroni==$PATRONIVERSION
-
+    pip install --upgrade patroni==$PATRONIVERSION && \
+    curl -Lo /tmp/origin.tar.gz 'https://github.com/openshift/origin/releases/download/v1.5.0-rc.0/openshift-origin-client-tools-v1.5.0-rc.0-49a4a7a-linux-64bit.tar.gz' && \
+    tar -xf /tmp/origin.tar.gz --wildcards --no-anchored 'oc*' --strip 1 -C /usr/bin/
 
 #install pg_view
 #RUN curl -L https://raw.githubusercontent.com/zalando/pg_view/2ea99479460d81361bdb7601a1564072ddd584ac/pg_view.py \
