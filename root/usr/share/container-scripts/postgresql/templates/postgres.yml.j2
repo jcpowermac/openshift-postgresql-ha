@@ -47,7 +47,7 @@ bootstrap:
   - locale: en_US.UTF-8
   - data-checksums
   pg_hba: 
-  - host replication replicator 0.0.0.0/0 md5
+  - host replication {{ ansible_env.POSTGRESQL_REP_USER }} 0.0.0.0/0 md5
   - host all all 0.0.0.0/0 md5
   users:
     admin:
