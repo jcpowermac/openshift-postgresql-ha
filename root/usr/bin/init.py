@@ -14,7 +14,6 @@ def main():
     #logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
     #logging.info("Changing the pod's role to %s" % sys.argv[2] )
 
-    time.sleep(30)
     returncode = subprocess.call(['/opt/rh/rh-postgresql95/root/usr/bin/createuser',
         '-U', 'postgres', '-h', '127.0.0.1', os.environ.get('POSTGRESQL_USER')])
     returncode = subprocess.call(['/opt/rh/rh-postgresql95/root/usr/bin/createdb',
