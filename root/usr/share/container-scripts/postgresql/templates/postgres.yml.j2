@@ -5,7 +5,7 @@ restapi:
   listen: 0.0.0.0:8008
   connect_address: {{ ansible_default_ipv4.address }}:8008
 etcd:
-    host: {{ etcd }}
+    host: {{ ansible_env.ETCD_SERVICE_URL }}
 bootstrap:
   dcs:
     ttl: 30

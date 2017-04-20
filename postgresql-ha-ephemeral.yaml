@@ -113,6 +113,8 @@ objects:
                 name: ${DATABASE_SERVICE_NAME}
           - name: POSTGRESQL_DATABASE
             value: ${POSTGRESQL_DATABASE}
+          - name: ETCD_SERVICE_URL
+            value: ${ETCD_SERVICE_URL}
           imagePullPolicy: Always
           livenessProbe:
             initialDelaySeconds: 30
@@ -253,4 +255,9 @@ parameters:
   name: POSTGRESQL_DATABASE
   required: true
   value: sampledb
+- description: Url of the etcd cluster
+  displayName: etcd url
+  name: ETCD_SERVICE_URL
+  required: true
+  value: example-etcd-cluster
 
