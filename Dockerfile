@@ -2,10 +2,6 @@ FROM centos/postgresql-95-centos7
 
 USER root
 
-RUN yum install -y epel-release && \
-    yum install -y etcd gcc make ansible python-pip iproute
-    
-# Install patroni and WAL-e
 ENV PATRONIVERSION=1.2.4
 ENV WALE_VERSION=1.0.3
 ENV PGHOME=/var/lib/pgsql/
@@ -16,12 +12,13 @@ ENV WALE_ENV_DIR=$PGHOME/etc/wal-e.d/env
 ENV USER_NAME=${PGUSER}
 ENV USER_UID=26
 
-RUN pip install pip --upgrade && \
+RUN yum install -y epel-release && \
+    yum install -y etcd gcc make ansible python-pip iproute && \
+    pip install pip --upgrade && \
     pip install --upgrade patroni==$PATRONIVERSION && \
     curl -Lo /tmp/origin.tar.gz 'https://github.com/openshift/origin/releases/download/v1.5.0-rc.0/openshift-origin-client-tools-v1.5.0-rc.0-49a4a7a-linux-64bit.tar.gz' && \
-    tar -C /usr/bin/ -xf /tmp/origin.tar.gz --wildcards --no-anchored 'oc' --strip 1
-
-RUN mv /opt/rh/rh-postgresql95/root/usr/bin/postgres{,-real} && \
+    tar -C /usr/bin/ -xf /tmp/origin.tar.gz --wildcards --no-anchored 'oc' --strip 1 && \
+    mv /opt/rh/rh-postgresql95/root/usr/bin/postgres{,-real} && \
     echo '#!/usr/bin/bash' > /opt/rh/rh-postgresql95/root/usr/bin/postgres && \
     cat /opt/rh/rh-postgresql95/enable >> /opt/rh/rh-postgresql95/root/usr/bin/postgres && \
     echo 'exec postgres-real "$@"' >> /opt/rh/rh-postgresql95/root/usr/bin/postgres && \
