@@ -60,7 +60,7 @@ bootstrap:
 postgresql:
   listen: 0.0.0.0:5432
   connect_address: {{ ansible_default_ipv4.address }}:5432
-  data_dir: /var/lib/pgsql/pgdata/pgroot/data
+  data_dir: {{ ansible_env.PGDATA }} 
   bin_dir: /opt/rh/rh-postgresql95/root/usr/bin
   pgpass: /tmp/pgpass0
   callbacks:
@@ -78,7 +78,7 @@ postgresql:
   parameters:
     logging_collector: 'on'
     log_destination: csvlog
-    log_directory: ../pg_log
+    log_directory: pg_log
     log_filename: 'postgresql-%u.log'
     log_file_mode: '0644'
     log_rotation_age: '1d'
