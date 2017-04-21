@@ -164,7 +164,7 @@ objects:
               memory: ${MEMORY_LIMIT}
           terminationMessagePath: /dev/termination-log
           volumeMounts:
-          - mountPath: /var/lib/pgsql/data
+          - mountPath: /var/lib/pgsql/pgdata
             name: ${DATABASE_SERVICE_NAME}-data
         dnsPolicy: ClusterFirst
         restartPolicy: Always

@@ -4,13 +4,14 @@ USER root
 
 ENV PATRONIVERSION=1.2.4 \
     WALE_VERSION=1.0.3 \
-    PGHOME=/var/lib/pgsql/ \
-    PGROOT=/var/lib/pgsql/
+    PGHOME=/var/lib/pgsql/ 
 
-ENV PGDATA=$PGROOT/data/
+ENV PGROOT=${PGHOME}/pgdata/pgroot
 
-ENV PGLOG=$PGDATA/pg_log/ \
-    WALE_ENV_DIR=$PGHOME/etc/wal-e.d/env \ 
+ENV PGDATA=${PGROOT}/data/
+
+ENV PGLOG=$PGROOT/pg_log/ \
+    WALE_ENV_DIR=${PGHOME}/etc/wal-e.d/env \ 
     USER_NAME=${PGUSER} \
     USER_UID=26
 
