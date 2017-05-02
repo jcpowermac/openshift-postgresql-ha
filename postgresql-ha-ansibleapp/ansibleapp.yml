@@ -1,0 +1,45 @@
+---
+name: ansibleapp/postgresql-ha-ansibleapp
+description: postgres ha with patroni
+bindable: true
+async: optional
+parameters:
+  - name: memory_limit 
+    description: Size of the cluster to deploy
+    type: string
+    default: 512Mi
+  - name: database_service_name 
+    description: Database service name
+    type: string
+    default: postgresql
+  - name: volume_capacity 
+    description: volume space available for data 
+    type: string
+    default: 1Gi
+  - description: Username for PostgreSQL user that will be used for accessing the database.
+    name: postgresql_user
+    required: true
+  - description: Password for the PostgreSQL postgres user.
+    name: postgresql_postgres_password
+    required: true
+  - description: Password for the PostgreSQL admin.
+    name: postgresql_admin_password
+    required: true
+  - description: Password for the PostgreSQL connection user.
+    name: postgresql_password
+    required: true
+  - description: Username for PostgreSQL user that will be used for replicating the database.
+    name: postgresql_rep_user
+    required: true
+  - description: Password for the PostgreSQL replication user.
+    name: postgresql_rep_password
+    required: true
+  - description: Name of the PostgreSQL database accessed.
+    name: postgresql_database
+    required: true
+    value: sampledb
+  - description: Url of the etcd cluster
+    name: etcd_service_url
+    required: true
+    value: example_etcd_cluster
+
