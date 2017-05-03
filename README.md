@@ -1,4 +1,6 @@
 ### PostgreSQL HA
+[![Build Status](https://osphaci.apps.virtomation.com/buildStatus/icon?job=jcpowermac/openshift-postgresql-ha/master)](https://osphaci.apps.virtomation.com/job/jcpowermac/job/openshift-postgresql-ha/job/master/)
+
 Updates will follow...
 Run PostgreSQL HA with Patroni on OpenShift.  Use either OpenShift template or Ansible Playbook Bundle (apb)
 
