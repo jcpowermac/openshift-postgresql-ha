@@ -1,0 +1,24 @@
+---
+
+- name: template project files
+  template:
+    src: '{{ item }}'
+    dest: /tmp/{{ item[0:-3] }}
+  with_items:
+    - etcd-statefulset.yaml.j2
+    - postgresql-ha-stateful.yaml.j2
+  register: templates 
+
+- name: "oc create {{ item }}"
+  command: "oc create -f {{ item.dest }}"
+  with_items: "{{ templates.results }}"
+  when: item | changed
+
+  #- name: debug
+  #  debug:
+  #    msg: "{{ item.dest }}"
+  #  with_items: "{{ templates.results }}"
+  #  when: item | changed
+
+
+

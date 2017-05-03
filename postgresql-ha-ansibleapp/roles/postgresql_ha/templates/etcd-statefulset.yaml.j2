@@ -16,14 +16,6 @@ items:
       port: 2380
       protocol: TCP
       targetPort: 2380
-    - name: etcd-4001
-      port: 4001
-      protocol: TCP
-      targetPort: 4001
-    - name: etcd-7001
-      port: 7001
-      protocol: TCP
-      targetPort: 7001    
     selector:
       name: etcd 
     sessionAffinity: None
@@ -43,14 +35,14 @@ items:
       spec:
         containers:
           - name: etcd
-            image: quay.io/coreos/etcd:latest 
+            image: docker.io/jcpowermac/etcd3:latest
             env:
               - name: ETCD_IP
                 valueFrom:
                   fieldRef:
                     fieldPath: status.podIP
             command: ["/bin/sh","-c"]
-            args: ["/usr/local/bin/etcd --name=postgresql --data-dir=/var/etcd/data --advertise-client-urls=http://$ETCD_IP:6666 --listen-client-urls=http://0.0.0.0:6666 --listen-peer-urls=http://0.0.0.0:6667"]
+            args: ["/usr/bin/etcd --name=postgresql --data-dir=/var/etcd/data --advertise-client-urls=http://$ETCD_IP:2379 --listen-client-urls=http://0.0.0.0:2379 --listen-peer-urls=http://0.0.0.0:2380"]
             volumeMounts:
               - name: var-etcd
                 mountPath: /var/etcd
@@ -61,12 +53,6 @@ items:
             - containerPort: 2380
               name: server
               protocol: TCP
-            - containerPort: 4001
-              name: etcd-4001
-              protocol: TCP
-            - containerPort: 7001
-              name: etcd-7001
-              protocol: TCP      
     volumeClaimTemplates:
       - metadata:
           name: var-etcd
