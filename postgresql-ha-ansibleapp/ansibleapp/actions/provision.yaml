@@ -1,0 +1,7 @@
+---
+- name: Deploy PostgreSQL HA to OpenShift
+  hosts: localhost
+  gather_facts: False
+  connection: local
+  roles:
+    - postgresql_ha

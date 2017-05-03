@@ -1,4 +1,4 @@
-FROM openshift/origin:v1.5.0
+FROM centos 
 
 RUN INSTALL_PKGS="etcd" && \
     yum install -y $INSTALL_PKGS && \
