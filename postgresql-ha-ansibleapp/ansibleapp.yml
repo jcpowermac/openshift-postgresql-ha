@@ -38,8 +38,4 @@ parameters:
     name: postgresql_database
     required: true
     value: sampledb
-  - description: Url of the etcd cluster
-    name: etcd_service_url
-    required: true
-    value: example_etcd_cluster
 
