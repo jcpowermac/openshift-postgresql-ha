@@ -1,0 +1,10 @@
+---
+- name: Deprovision PostgreSQL HA to OpenShift
+  hosts: localhost
+  gather_facts: False
+  connection: local
+  tasks:
+    - name: Delete Project
+      command: "oc delete project openshift-postgresql-ha"
+
+
