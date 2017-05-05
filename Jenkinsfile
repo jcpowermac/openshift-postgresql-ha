@@ -4,6 +4,14 @@ import com.redhat.*
 
 properties([disableConcurrentBuilds()])
 
+
+node('slave-ansible') {
+    stage('checkout') {
+        checkout scm
+        sh "tox"
+    }
+}
+
 node {
     def source = ""
     def dockerfiles = null
@@ -56,8 +64,8 @@ node {
                 url = scmUrl
                 branch = scmRef
                 contextDir = path
-                deleteBuild = false 
-                randomName = true 
+                deleteBuild = false
+                randomName = true
             }
 
             resources = newBuild.names
