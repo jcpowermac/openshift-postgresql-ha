@@ -1,5 +1,6 @@
 """A setuptools based setup module.
-
+Code from:
+https://github.com/openshift/openshift-ansible
 """
 from __future__ import print_function
 
