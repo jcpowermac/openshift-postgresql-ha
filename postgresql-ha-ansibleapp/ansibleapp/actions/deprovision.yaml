@@ -6,5 +6,3 @@
   tasks:
     - name: Delete Project
       command: "oc delete project openshift-postgresql-ha"
-
-

@@ -1,48 +1,44 @@
+---
 apiVersion: v1
 kind: Template
 metadata:
   creationTimestamp: null
   name: postgresql-ha-ephemeral-template
 objects:
-
 - apiVersion: v1
   kind: ServiceAccount
   metadata:
-    name: ${DATABASE_SERVICE_NAME} 
+    name: ${DATABASE_SERVICE_NAME}
 
 - apiVersion: v1
   groupNames: null
   kind: RoleBinding
   metadata:
-    name: postgres_edit 
+    name: postgres_edit
   roleRef:
     name: edit
   subjects:
   - kind: ServiceAccount
-    name: ${DATABASE_SERVICE_NAME} 
-
-
-
+    name: ${DATABASE_SERVICE_NAME}
 - apiVersion: v1
   kind: Service
   metadata:
-    name: ${DATABASE_SERVICE_NAME} 
+    name: ${DATABASE_SERVICE_NAME}
   spec:
     ports:
     - name: postgresql
       port: 5432
       protocol: TCP
       targetPort: 5432
-    - name: patroni 
+    - name: patroni
       port: 8008
       protocol: TCP
       targetPort: 8008
     selector:
-      name: ${DATABASE_SERVICE_NAME} 
+      name: ${DATABASE_SERVICE_NAME}
       role: master
     sessionAffinity: None
     type: ClusterIP
-
 - apiVersion: v1
   kind: Secret
   metadata:
@@ -54,9 +50,8 @@ objects:
     database-replica-password: ${POSTGRESQL_REP_PASSWORD}
     database-admin-password: ${POSTGRESQL_ADMIN_PASSWORD}
     database-postgres-password: ${POSTGRESQL_POSTGRES_PASSWORD}
-
-- apiVersion: apps/v1beta1 
-  kind: StatefulSet 
+- apiVersion: apps/v1beta1
+  kind: StatefulSet
   metadata:
     name: ${DATABASE_SERVICE_NAME}
     annotations:
@@ -74,11 +69,11 @@ objects:
                             }
                           ]
                          },
-                         "topologyKey": "kubernetes.io/hostname" 
+                         "topologyKey": "kubernetes.io/hostname"
                     }
                   ]
                  }
-            } 
+            }
   spec:
     serviceName: ${DATABASE_SERVICE_NAME}
     replicas: 3
@@ -90,7 +85,7 @@ objects:
             - key: name
               operator: "In"
               values:
-                - ${DATABASE_SERVICE_NAME}
+              - ${DATABASE_SERVICE_NAME}
           topologyKey: kubernetes.io/hostname
     template:
       metadata:
@@ -99,7 +94,7 @@ objects:
           name: ${DATABASE_SERVICE_NAME}
       spec:
         containers:
-        - image: docker.io/jcpowermac/openshift-postgresql-ha 
+        - image: docker.io/jcpowermac/openshift-postgresql-ha
           env:
           - name: POSTGRESQL_REP_USER
             valueFrom:
@@ -150,10 +145,10 @@ objects:
               - -c
               - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c
                 'SELECT 1'
-            initialDelaySeconds: 10 
+            initialDelaySeconds: 10
             failureThreshold: 30
             periodSeconds: 10
-          name: postgresql 
+          name: postgresql
           ports:
           - containerPort: 5432
             protocol: TCP
@@ -174,13 +169,13 @@ objects:
         terminationGracePeriodSeconds: 30
     volumeClaimTemplates:
     - metadata:
-        name:  ${DATABASE_SERVICE_NAME}-data
+        name: ${DATABASE_SERVICE_NAME}-data
         annotations: {}
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: ${VOLUME_CAPACITY} 
+            storage: ${VOLUME_CAPACITY}
 parameters:
 - description: Maximum amount of memory the container can use.
   displayName: Memory Limit
@@ -248,4 +243,3 @@ parameters:
   name: ETCD_SERVICE_URL
   required: true
   value: example-etcd-cluster
-
