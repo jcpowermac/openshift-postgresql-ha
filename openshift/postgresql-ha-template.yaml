@@ -7,17 +7,17 @@ items:
   metadata:
     annotations: {}
     labels: {}
-    name: postgres 
+    name: postgres
 - apiVersion: v1
   groupNames: null
   kind: RoleBinding
   metadata:
-    name: postgres_edit 
+    name: postgres_edit
   roleRef:
     name: edit
   subjects:
   - kind: ServiceAccount
-    name: postgres 
+    name: postgres
 - apiVersion: v1
   kind: Service
   metadata:

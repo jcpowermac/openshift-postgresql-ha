@@ -1,48 +1,43 @@
+---
 apiVersion: v1
 kind: Template
 metadata:
   creationTimestamp: null
   name: postgresql-ha-ephemeral-template
 objects:
-
 - apiVersion: v1
   kind: ServiceAccount
   metadata:
-    name: ${DATABASE_SERVICE_NAME} 
-
+    name: ${DATABASE_SERVICE_NAME}
 - apiVersion: v1
   groupNames: null
   kind: RoleBinding
   metadata:
-    name: postgres_edit 
+    name: postgres_edit
   roleRef:
     name: edit
   subjects:
   - kind: ServiceAccount
-    name: ${DATABASE_SERVICE_NAME} 
-
-
-
+    name: ${DATABASE_SERVICE_NAME}
 - apiVersion: v1
   kind: Service
   metadata:
-    name: ${DATABASE_SERVICE_NAME} 
+    name: ${DATABASE_SERVICE_NAME}
   spec:
     ports:
     - name: postgresql
       port: 5432
       protocol: TCP
       targetPort: 5432
-    - name: patroni 
+    - name: patroni
       port: 8008
       protocol: TCP
       targetPort: 8008
     selector:
-      name: ${DATABASE_SERVICE_NAME} 
+      name: ${DATABASE_SERVICE_NAME}
       role: master
     sessionAffinity: None
     type: ClusterIP
-
 - apiVersion: v1
   kind: Secret
   metadata:
@@ -54,7 +49,6 @@ objects:
     database-replica-password: ${POSTGRESQL_REP_PASSWORD}
     database-admin-password: ${POSTGRESQL_ADMIN_PASSWORD}
     database-postgres-password: ${POSTGRESQL_POSTGRES_PASSWORD}
-
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -79,7 +73,7 @@ objects:
           name: ${DATABASE_SERVICE_NAME}
       spec:
         containers:
-        - image: ' '  
+        - image: ' '
           env:
           - name: POSTGRESQL_REP_USER
             valueFrom:
@@ -121,7 +115,7 @@ objects:
             tcpSocket:
               port: 5432
             timeoutSeconds: 1
-          name: postgresql 
+          name: postgresql
           ports:
           - containerPort: 5432
             protocol: TCP
@@ -148,14 +142,11 @@ objects:
     - imageChangeParams:
         automatic: true
         containerNames:
-        - postgresql 
+        - postgresql
         from:
           kind: ImageStreamTag
           name: ${DATABASE_SERVICE_NAME}:9.5
       type: ImageChange
-
-
-
 - apiVersion: v1
   kind: ImageStream
   metadata:
@@ -163,20 +154,16 @@ objects:
     name: postgresql-95-centos7
   spec:
     dockerImageRepository: "docker.io/centos/postgresql-95-centos7"
-
-
 - apiVersion: v1
   kind: ImageStream
   metadata:
     annotations: {}
     name: postgresql
-
-
 - apiVersion: v1
   kind: BuildConfig
   metadata:
     annotations: {}
-    name: ${DATABASE_SERVICE_NAME} 
+    name: ${DATABASE_SERVICE_NAME}
   spec:
     nodeSelector: null
     output:
@@ -205,27 +192,23 @@ parameters:
   name: MEMORY_LIMIT
   required: true
   value: 512Mi
-
 - description: The name of the OpenShift Service exposed for the database.
   displayName: Database Service Name
   name: DATABASE_SERVICE_NAME
   required: true
   value: postgresql
-
 - description: Username for PostgreSQL user that will be used for accessing the database.
   displayName: PostgreSQL Connection Username
   from: user[A-Z0-9]{3}
   generate: expression
   name: POSTGRESQL_USER
   required: true
-
 - description: Password for the PostgreSQL postgres user.
   displayName: PostgreSQL postgres Password
   from: '[a-zA-Z0-9]{16}'
   generate: expression
   name: POSTGRESQL_POSTGRES_PASSWORD
   required: true
-
 - description: Password for the PostgreSQL admin.
   displayName: PostgreSQL Admin Password
   from: '[a-zA-Z0-9]{16}'
@@ -260,4 +243,3 @@ parameters:
   name: ETCD_SERVICE_URL
   required: true
   value: example-etcd-cluster
-
