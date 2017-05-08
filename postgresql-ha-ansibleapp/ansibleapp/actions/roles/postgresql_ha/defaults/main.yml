@@ -1,4 +1,5 @@
 ---
+project_name: postgresql
 database_service_name: postgresql
 postgresql_password: password
 postgresql_user: psqluser

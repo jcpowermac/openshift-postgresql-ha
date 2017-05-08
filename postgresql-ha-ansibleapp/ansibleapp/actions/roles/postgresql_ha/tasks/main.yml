@@ -8,8 +8,14 @@
     - postgresql-ha-stateful.yaml.j2
   register: templates
 
+- name: OpenShift Use Project
+  command: "oc project {{ project_name }}"
+  ignore_errors: True
+  register: use_project
+
 - name: OpenShift Create Project
-  command: "oc new-project openshift-postgresql-ha"
+  command: "oc new-project {{ project_name }}"
+  when: use_project | failed
 
 - name: OpenShift Create Resources
   command: "oc create -f {{ item.dest }}"
