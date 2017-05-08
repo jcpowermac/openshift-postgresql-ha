@@ -150,58 +150,6 @@ class OpenShiftAnsiblePylint(PylintCommand):
         return func(*func_args, **func_kwargs)
 
 
-class OpenShiftAnsibleGenerateValidation(Command):
-    ''' Command to run generated module validation'''
-    description = "Run generated module validation"
-    user_options = []
-
-    def initialize_options(self):
-        ''' initialize_options '''
-        pass
-
-    def finalize_options(self):
-        ''' finalize_options '''
-        pass
-
-    # self isn't used but I believe is required when it is called.
-    # pylint: disable=no-self-use
-    def run(self):
-        ''' run command '''
-        # find the files that call generate
-        generate_files = find_files('roles',
-                                    ['inventory',
-                                     'test',
-                                     'playbooks',
-                                     'utils'],
-                                    None,
-                                    'generate.py$')
-
-        if len(generate_files) < 1:
-            print('Did not find any code generation.  Please verify module code generation.')  # noqa: E501
-            raise SystemExit(1)
-
-        errors = False
-        for gen in generate_files:
-            print('Checking generated module code: {0}'.format(gen))
-            try:
-                sys.path.insert(0, os.path.dirname(gen))
-                # we are importing dynamically.  This isn't in
-                # the python path.
-                # pylint: disable=import-error
-                import generate
-                reload_module(generate)
-                generate.verify()
-            except generate.GenerateAnsibleException as gae:
-                print(gae.args)
-                errors = True
-
-        if errors:
-            print('Found errors while generating module code.')
-            raise SystemExit(1)
-
-        print('\nAll generate scripts passed.\n')
-
-
 class OpenShiftAnsibleSyntaxCheck(Command):
     ''' Command to run Ansible syntax check'''
     description = "Run Ansible syntax check"
@@ -229,8 +177,6 @@ class OpenShiftAnsibleSyntaxCheck(Command):
             print('-' * 60)
             print('Syntax checking playbook: %s' % yaml_file)
             try:
-                print(yaml_file)
-                print(os.path.basename(yaml_file))
                 base_name = os.path.basename(yaml_file)
 
                 if "ansibleapp.yml" not in base_name:
@@ -285,7 +231,6 @@ setup(
         'sdist': UnsupportedCommand,
         'lint': OpenShiftAnsiblePylint,
         'yamllint': OpenShiftAnsibleYamlLint,
-        'generate_validation': OpenShiftAnsibleGenerateValidation,
         'ansible_syntax': OpenShiftAnsibleSyntaxCheck,
     },
     packages=[],
