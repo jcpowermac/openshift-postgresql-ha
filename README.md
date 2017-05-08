@@ -10,6 +10,7 @@ Run PostgreSQL HA with Patroni on OpenShift.  Use either OpenShift template or A
 sudo docker run --dns 10.53.252.123 --rm -it \
 -e "OPENSHIFT_TARGET=openshift.virtomation.com:8443" \
 -e "OPENSHIFT_USER=jcallen" -e "OPENSHIFT_PASS=" \
+-e "project_name=openshift-postgresql-ha" \
 -e "postgresql_user=psqluser" \
 -e "postgresql_postgres_password=password" \
 -e "postgresql_admin_password=password" \
