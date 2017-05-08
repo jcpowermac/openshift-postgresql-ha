@@ -5,7 +5,7 @@ items:
 - apiVersion: v1
   kind: Service
   metadata:
-    name: etcd
+    name: {{ etcd_name }}
   spec:
     ports:
     - name: client
@@ -17,35 +17,42 @@ items:
       protocol: TCP
       targetPort: 2380
     selector:
-      name: etcd 
+      name: {{ etcd_name }}
     sessionAffinity: None
     type: ClusterIP
-
 - apiVersion: apps/v1beta1
   kind: StatefulSet
   metadata:
-    name: etcd
+    name: {{ etcd_name }}
   spec:
-    serviceName: etcd
-    replicas: 1
+    serviceName: {{ etcd_name }}
+    replicas: {{ etcd_replicas }}
     template:
       metadata:
         labels:
-          name: etcd
+          name: {{ etcd_name }}
       spec:
         containers:
-          - name: etcd
+          - name: {{ etcd_name }}
             image: docker.io/jcpowermac/etcd3:latest
             env:
-              - name: ETCD_IP
-                valueFrom:
-                  fieldRef:
-                    fieldPath: status.podIP
-            command: ["/bin/sh","-c"]
-            args: ["/usr/bin/etcd --name=postgresql --data-dir=/var/etcd/data --advertise-client-urls=http://$ETCD_IP:2379 --listen-client-urls=http://0.0.0.0:2379 --listen-peer-urls=http://0.0.0.0:2380"]
+              - name: ETCD_DATA_DIR
+                value: "{{ etcd_data_dir }}"
+              - name: ETCD_NAME
+                value: "{{ etcd_name }}"
+              - name: ETCD_INITIAL_CLUSTER
+                value: "{{ etcd_initial_cluster[:-1] }}"
+              - name: ETCD_INITIAL_ADVERTISE_PEER_URLS
+                value: "{{ etcd_initial_advertise_peer_url }}"
+              - name: ETCD_ADVERTISE_PEER_URLS
+                value: "{{ etcd_advertise_peer_url }}"
+              - name: ETCD_LISTEN_PEER_URLS
+                value: "http://0.0.0.0:2380"
+              - name: ETCD_LISTEN_CLIENT_URLS
+                value: "http://0.0.0.0:2379"
             volumeMounts:
-              - name: var-etcd
-                mountPath: /var/etcd
+              - name: etcd-data
+                mountPath: "{{ etcd_data_dir }}"
             ports:
             - containerPort: 2379
               name: client
@@ -55,7 +62,7 @@ items:
               protocol: TCP
     volumeClaimTemplates:
       - metadata:
-          name: var-etcd
+          name: etcd-data
           annotations: {}
         spec:
           accessModes: [ "ReadWriteOnce" ]
