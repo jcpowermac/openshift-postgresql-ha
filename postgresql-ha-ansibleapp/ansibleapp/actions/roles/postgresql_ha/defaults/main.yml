@@ -10,3 +10,11 @@ postgresql_postgres_password: password
 postgresql_database: dbname
 memory_limit: 512Mi
 volume_capacity: 1Gi
+
+etcd_name: etcd
+etcd_replicas: 3
+etcd_data_dir: /var/etcd
+
+
+
+
