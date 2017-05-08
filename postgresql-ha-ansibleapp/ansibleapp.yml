@@ -1,9 +1,14 @@
 ---
+id: ea3f37ca-d36a-4cfa-8c95-c9de64c1d531
 name: ansibleapp/postgresql-ha-ansibleapp
 description: postgres ha with patroni
 bindable: true
 async: optional
 parameters:
+  - name: project_name
+    description: Name of OpenShift project
+    type: string
+    default: postgresql
   - name: memory_limit
     description: Size of the cluster to deploy
     type: string
