@@ -1,6 +1,3 @@
 ---
 etcd_initial_cluster: |
-  {% for n in range(etcd_replicas) -%}etcd-{{ n }}=http://etcd-{{ n }}.{{ project_name }}.svc.cluster.local:2380{% if not loop.last %},{% endif %}{%- endfor %}
-
-etcd_initial_advertise_peer_url: "http://{{ etcd_name }}.etcd.{{ project_name }}.svc.cluster.local:2380"
-etcd_advertise_peer_url: "http://{{ etcd_name }}.etcd.{{ project_name }}.svc.cluster.local:2379"
+  {% for n in range(etcd_replicas) -%}etcd-{{ n }}=http://etcd-{{ n }}.{{ etcd_name }}:2380{% if not loop.last %},{% endif %}{%- endfor %}
