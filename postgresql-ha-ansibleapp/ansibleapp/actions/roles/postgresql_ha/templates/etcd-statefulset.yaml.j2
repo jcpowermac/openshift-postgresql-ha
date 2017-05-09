@@ -16,10 +16,9 @@ items:
       port: 2380
       protocol: TCP
       targetPort: 2380
+    clusterIP: None
     selector:
       name: {{ etcd_name }}
-    sessionAffinity: None
-    type: ClusterIP
 - apiVersion: apps/v1beta1
   kind: StatefulSet
   metadata:
@@ -36,20 +35,22 @@ items:
           - name: {{ etcd_name }}
             image: docker.io/jcpowermac/etcd3:latest
             env:
+              - name: ETCD_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
               - name: ETCD_DATA_DIR
                 value: "{{ etcd_data_dir }}"
-              - name: ETCD_NAME
-                value: "{{ etcd_name }}"
               - name: ETCD_INITIAL_CLUSTER
                 value: "{{ etcd_initial_cluster[:-1] }}"
               - name: ETCD_INITIAL_ADVERTISE_PEER_URLS
-                value: "{{ etcd_initial_advertise_peer_url }}"
-              - name: ETCD_ADVERTISE_PEER_URLS
-                value: "{{ etcd_advertise_peer_url }}"
+                value: "http://$(ETCD_NAME).{{ etcd_name }}:2380"
               - name: ETCD_LISTEN_PEER_URLS
                 value: "http://0.0.0.0:2380"
               - name: ETCD_LISTEN_CLIENT_URLS
                 value: "http://0.0.0.0:2379"
+              - name: ETCD_ADVERTISE_CLIENT_URLS
+                value: "http://$(ETCD_NAME).{{ etcd_name }}:2379"
             volumeMounts:
               - name: etcd-data
                 mountPath: "{{ etcd_data_dir }}"
