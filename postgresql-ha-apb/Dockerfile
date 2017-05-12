@@ -1,8 +1,8 @@
-FROM ansibleapp/ansibleapp-base
+FROM ansibleplaybookbundle/apb-base
 # MAINTAINER {{ $MAINTAINER }}
 
-LABEL "com.redhat.ansibleapp.version"="0.1.0"
-LABEL "com.redhat.ansibleapp.spec"=\
+LABEL "com.redhat.apb.version"="0.1.0"
+LABEL "com.redhat.apb.spec"=\
 "aWQ6IGVhM2YzN2NhLWQzNmEtNGNmYS04Yzk1LWM5ZGU2NGMxZDUzMQotLS0KbmFtZTogYW5zaWJs\
 ZWFwcC9wb3N0Z3Jlc3FsLWhhLWFuc2libGVhcHAKZGVzY3JpcHRpb246IHBvc3RncmVzIGhhIHdp\
 dGggcGF0cm9uaQpiaW5kYWJsZTogdHJ1ZQphc3luYzogb3B0aW9uYWwKcGFyYW1ldGVyczoKICAt\
@@ -29,8 +29,7 @@ c3RncmVTUUwgcmVwbGljYXRpb24gdXNlci4KICAgIG5hbWU6IHBvc3RncmVzcWxfcmVwX3Bhc3N3\
 b3JkCiAgICByZXF1aXJlZDogdHJ1ZQogIC0gZGVzY3JpcHRpb246IE5hbWUgb2YgdGhlIFBvc3Rn\
 cmVTUUwgZGF0YWJhc2UgYWNjZXNzZWQuCiAgICBuYW1lOiBwb3N0Z3Jlc3FsX2RhdGFiYXNlCiAg\
 ICByZXF1aXJlZDogdHJ1ZQogICAgdmFsdWU6IHNhbXBsZWRiCg=="
-ADD ansibleapp /opt/ansibleapp
+COPY playbooks /opt/apb/actions
+COPY roles /opt/ansible/roles
 
-RUN useradd -u 1001 -r -g 0 -M -b /opt/ansibleapp -s /sbin/nologin -c "ansibleapp user" ansibleapp
-RUN chown -R 1001:0 /opt/ansibleapp
-USER 1001
+USER apb
