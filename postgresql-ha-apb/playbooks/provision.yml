@@ -1,7 +1,11 @@
 ---
-- name: Deploy PostgreSQL HA to OpenShift
+- name: postgresql-ha-apb playbook to provision the application
   hosts: localhost
   gather_facts: False
   connection: local
   roles:
-    - postgresql_ha
+  - role: ansible.kubernetes-modules
+    install_python_requirements: no
+  - role: ansibleplaybookbundle.asb-modules
+  - role: provision-postgresql-ha-apb
+    playbook_debug: false

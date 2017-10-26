@@ -1,45 +1,56 @@
----
-id: ea3f37ca-d36a-4cfa-8c95-c9de64c1d531
-name: ansibleapp/postgresql-ha-ansibleapp
-description: postgres ha with patroni
-bindable: true
+name: postgresql-ha-apb
+image: karmalabs/postgresql-ha-apb
+description: APB patroni postgresql
+bindable: False
 async: optional
-parameters:
-  - name: project_name
-    description: Name of OpenShift project
-    type: string
-    default: postgresql
-  - name: memory_limit
-    description: Size of the cluster to deploy
-    type: string
-    default: 512Mi
-  - name: database_service_name
-    description: Database service name
-    type: string
-    default: postgresql
-  - name: volume_capacity
-    description: volume space available for data
-    type: string
-    default: 1Gi
-  - description: Username for PostgreSQL user that will be used for accessing the database.
-    name: postgresql_user
-    required: true
-  - description: Password for the PostgreSQL postgres user.
-    name: postgresql_postgres_password
-    required: true
-  - description: Password for the PostgreSQL admin.
-    name: postgresql_admin_password
-    required: true
-  - description: Password for the PostgreSQL connection user.
-    name: postgresql_password
-    required: true
-  - description: Username for PostgreSQL user that will be used for replicating the database.
-    name: postgresql_rep_user
-    required: true
-  - description: Password for the PostgreSQL replication user.
-    name: postgresql_rep_password
-    required: true
-  - description: Name of the PostgreSQL database accessed.
-    name: postgresql_database
-    required: true
-    value: sampledb
+version: 0.1
+metadata:
+  displayName: postgresql-ha-apb (APB)
+  imageUrl: https://pasteboard.co/GNv1z8v.png
+plans:
+  - name: default
+    description: This default plan deploys postgresql
+    free: True
+    metadata: {}
+    parameters:
+      - name: database_service_name
+        title: Database service name
+        type: string
+        default: postgresql
+      - name: memory_limit
+        title: Size of the cluster to deploy
+        type: string
+        default: 512Mi
+      - name: volume_capacity
+        title: volume space available for data
+        type: string
+        default: 1Gi
+      - title: Username for PostgreSQL user that will be used for accessing the database
+        name: postgresql_user
+        type: string
+        required: true
+      - title: Password for the PostgreSQL postgres user
+        name: postgresql_postgres_password
+        type: string
+        required: true
+      - title: Password for the PostgreSQL admin
+        name: postgresql_admin_password
+        type: string
+        required: true
+      - title: Password for the PostgreSQL connection user
+        name: postgresql_password
+        type: string
+        required: true
+      - title: Username for PostgreSQL user that will be used for replicating the database
+        name: postgresql_rep_user
+        type: string
+        required: true
+      - title: Password for the PostgreSQL replication user
+        name: postgresql_rep_password
+        required: true
+        type: string
+      - title: Name of the PostgreSQL database accessed
+        name: postgresql_database
+        required: true
+        value: sampledb
+        type: string

@@ -1,0 +1,46 @@
+---
+- name: Select Project
+  command: "oc project {{ namespace }}"
+  # ignore_errors: True
+
+- name: Delete Etcd Service
+  k8s_v1_service:
+    name: "{{ etcd_name }}"
+    namespace: "{{ namespace }}"
+    state: absent
+
+- name: Delete Etcd Stateful Set
+  k8s_v1beta1_stateful_set:
+    name: "{{ etcd_name }}"
+    namespace: "{{ namespace }}"
+    state: absent
+
+- name: Delete Postgresql Service
+  k8s_v1_service:
+    name: "{{ database_service_name }}"
+    namespace: "{{ namespace }}"
+    state: absent
+
+- name: Delete Postgresql Service Account
+  k8s_v1_service_account:
+    name: "{{ database_service_name }}"
+    namespace: "{{ namespace }}"
+    state: absent
+
+- name: Delete Postgresql Role Binding
+  k8s_v1alpha1_role_binding:
+    name: postgres_edit
+    state: absent
+    namespace: "{{ namespace }}"
+
+- name: Delete Postgresql Secret
+  k8s_v1_secret:
+    name: "{{ database_service_name }}"
+    namespace: "{{ namespace }}"
+    state: absent
+
+- name: Delete Posgresql Stateful Set
+  k8s_v1beta1_stateful_set:
+    name: "{{ database_service_name }}"
+    namespace: "{{ namespace }}"
+    state: absent

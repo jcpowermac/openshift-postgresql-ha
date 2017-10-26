@@ -1,0 +1,15 @@
+---
+database_service_name: postgresql
+postgresql_password: password
+postgresql_user: psqluser
+postgresql_rep_user: repuser
+postgresql_rep_password: reppassword
+postgresql_admin_password: password
+postgresql_postgres_password: password
+postgresql_database: dbname
+memory_limit: 512Mi
+volume_capacity: 1Gi
+etcd_name: etcd
+etcd_replicas: 3
+etcd_data_dir: /var/run/etcd
+headless_etcd_service_name: hletcd
