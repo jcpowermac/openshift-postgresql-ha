@@ -1,0 +1,242 @@
+---
+- name: Select Project
+  command: "oc project {{ namespace }}"
+  # ignore_errors: True
+
+- name: Create Etcd Service
+  k8s_v1_service:
+    name: "{{ etcd_name }}"
+    namespace: "{{ namespace }}"
+    labels:
+      app: "{{ etcd_name }}"
+      service: "{{ etcd_name }}"
+    selector:
+      name: "{{ etcd_name }}"
+    ports:
+      - port: 2379
+        target_port: 2379
+        protocol: TCP
+        name: client
+      - port: 2380
+        target_port: 2380
+        protocol: TCP
+        name: server
+
+- name: Create Etcd Stateful Set
+  k8s_v1beta1_stateful_set:
+    name: "{{ etcd_name }}"
+    namespace: "{{ namespace }}"
+    labels:
+      name: "{{ etcd_name }}"
+    state: present
+    service_name: "{{ etcd_name }}"
+    replicas: "{{ etcd_replicas }}"
+    spec_template_metadata_labels:
+      name: "{{ etcd_name }}"
+    spec_template_metadata_name: "{{ etcd_name }}"
+    containers:
+    - name: "{{ etcd_name }}"
+      image: docker.io/jcpowermac/etcd3:latest
+      env:
+        - name: ETCD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: ETCD_DATA_DIR
+          value: "{{ etcd_data_dir }}"
+        - name: ETCD_INITIAL_CLUSTER
+          value: "{{ etcd_initial_cluster[:-1] }}"
+        - name: ETCD_INITIAL_ADVERTISE_PEER_URLS
+          value: "http://$(ETCD_NAME).{{ etcd_name }}:2380"
+        - name: ETCD_LISTEN_PEER_URLS
+          value: "http://0.0.0.0:2380"
+        - name: ETCD_LISTEN_CLIENT_URLS
+          value: "http://0.0.0.0:2379"
+        - name: ETCD_ADVERTISE_CLIENT_URLS
+          value: "http://$(ETCD_NAME).{{ etcd_name }}:2379"
+      volumeMounts:
+        - name: etcd-data
+          mountPath: "{{ etcd_data_dir }}"
+      ports:
+      - containerPort: 2379
+        name: client
+        protocol: TCP
+      - containerPort: 2380
+        name: server
+        protocol: TCP
+    spec_volume_claim_templates:
+      - metadata:
+          name: etcd-data
+          annotations: {}
+        spec:
+          accessModes: [ "ReadWriteOnce" ]
+          resources:
+            requests:
+              storage: 1Gi
+
+- name: Create Postgresql Service
+  k8s_v1_service:
+    name: "{{ database_service_name }}"
+    namespace: "{{ namespace }}"
+    labels:
+      app: "{{ database_service_name }}"
+      service: "{{ database_service_name }}"
+    selector:
+      name: "{{ database_service_name }}"
+      role: master
+    ports:
+      - port: 5432
+        target_port: 5432
+        protocol: TCP
+        name: postgresql
+      - port: 8008
+        target_port: 8008
+        protocol: TCP
+        name: patroni
+
+- name: Create Postgresql Service Account
+  k8s_v1_service_account:
+    name: "{{ database_service_name }}"
+    namespace: "{{ namespace }}"
+
+#- name: Create Postgresql Role Binding
+#  k8s_v1alpha1_role_binding:
+#    name: postgres_edit
+#    namespace: "{{ namespace }}"
+#    role_ref_name: /edit
+#    subjects:
+#    - kind: ServiceAccount
+#      name: "{{ database_service_name }}"
+#      namespace: "{{ namespace }}"
+
+- name: Create Postgresql Role Binding
+  command: "oc adm policy add-role-to-user edit -z {{ database_service_name }} -n postgrekarimbo {{ namespace }}"
+
+- name: Create Postgresql Secret
+  k8s_v1_secret:
+    name: "{{ database_service_name }}"
+    namespace: "{{ namespace }}"
+    string_data:
+     database-password: "{{ postgresql_password }}"
+     database-user: "{{ postgresql_user }}"
+     database-replica-user: "{{ postgresql_rep_user }}"
+     database-replica-password: "{{ postgresql_rep_password }}"
+     database-admin-password: "{{ postgresql_admin_password }}"
+     database-postgres-password: "{{ postgresql_postgres_password }}"
+
+- name: Prepare Postgresql Annotation
+  set_fact:
+    postgresql_annotation: >
+                scheduler.alpha.kubernetes.io/affinity: >
+                      {
+                          "podAntiAffinity": {
+                            "requiredDuringSchedulingIgnoredDuringExecution": [
+                              {
+                                  "labelSelector": {
+                                    "matchExpressions": [
+                                      {
+                                        "key": "name",
+                                        "operator": "In",
+                                        "values": ["{{ database_service_name }}"]
+                                      }
+                                    ]
+                                   },
+                                   "topologyKey": "kubernetes.io/hostname"
+                              }
+                            ]
+                           }
+
+- name: Create Posgresql Stateful Set
+  k8s_v1beta1_stateful_set:
+    name: "{{ database_service_name }}"
+    namespace: "{{ namespace }}"
+    annotations: "{{ postgresql_annotation | from_yaml }}"
+    labels:
+      name: "{{ database_service_name }}"
+    state: present
+    service_name: "{{ database_service_name }}"
+    replicas: 3
+    spec_template_metadata_labels:
+      name: "{{ database_service_name }}"
+    spec_template_metadata_name: "{{ database_service_name }}"
+    containers:
+     - image: docker.io/jcpowermac/openshift-postgresql-ha
+       env:
+       - name: POSTGRESQL_REP_USER
+         valueFrom:
+           secretKeyRef:
+             key: database-replica-user
+             name: "{{ database_service_name }}"
+       - name: POSTGRESQL_REP_PASSWORD
+         valueFrom:
+           secretKeyRef:
+             key: database-replica-password
+             name: "{{ database_service_name }}"
+       - name: POSTGRESQL_USER
+         valueFrom:
+           secretKeyRef:
+             key: database-user
+             name: "{{ database_service_name }}"
+       - name: POSTGRESQL_PASSWORD
+         valueFrom:
+           secretKeyRef:
+             key: database-password
+             name: "{{ database_service_name }}"
+       - name: POSTGRESQL_ADMIN_PASSWORD
+         valueFrom:
+           secretKeyRef:
+             key: database-admin-password
+             name: "{{ database_service_name }}"
+       - name: POSTGRESQL_POSTGRES_PASSWORD
+         valueFrom:
+           secretKeyRef:
+             key: database-postgres-password
+             name: "{{ database_service_name }}"
+       - name: POSTGRESQL_DATABASE
+         value: "{{ postgresql_database }}"
+       - name: ETCD_SERVICE_URL
+         value: etcd
+       imagePullPolicy: Always
+       livenessProbe:
+         initialDelaySeconds: 60
+         tcpSocket:
+           port: 5432
+         periodSeconds: 30
+         failureThreshold: 20
+       readinessProbe:
+         exec:
+           command:
+           - /bin/sh
+           - -i
+           - -c
+           - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c
+             'SELECT 1'
+         initialDelaySeconds: 10
+         failureThreshold: 30
+         periodSeconds: 10
+       name: postgresql
+       ports:
+       - containerPort: 5432
+         protocol: TCP
+       - containerPort: 8008
+         protocol: TCP
+       resources:
+         limits:
+           memory: "{{ memory_limit }}"
+       terminationMessagePath: /dev/termination-log
+       volumeMounts:
+       - mountPath: /var/lib/pgsql/pgdata
+         name: "{{ database_service_name }}-data"
+    dns_policy: ClusterFirst
+    restart_policy: Always
+    service_account_name: "{{ database_service_name }}"
+    termination_grace_period_seconds: 30
+    spec_volume_claim_templates:
+    - metadata:
+        name:  "{{ database_service_name }}-data"
+        annotations: {}
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: "{{ volume_capacity }}"

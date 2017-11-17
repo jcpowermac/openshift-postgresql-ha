@@ -1,0 +1,15 @@
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  name: karimbo-posgresql-ha
+  namespace: postgrekarimbo
+spec:
+  externalClusterServiceClassName: apb-push-postgresql-ha-apb
+  externalClusterServicePlanName: default
+  parameters:
+    postgresql_user: "karimbo"
+    postgresql_password: "karimbo"
+    postgresql_postgres_password: "changeme"
+    postgresql_admin_password: "secret"
+    postgresql_rep_user: 'replica'
+    postgresql_rep_password: 'replica'
